@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="en">
+    <head>
+	<title>WEBGIS SLEMAN BY SENA</title>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
+        <link rel="stylesheet" href="css/qgis2web.css">
+        <link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/leaflet.photon.css">
+        <link rel="stylesheet" href="css/leaflet-measure.css">
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+			#map {
+            width: 100%;
+            height: 85%;
+            padding: 0;
+            margin: 0;
+        }
+        </style>
+        </style>
+        <title></title>
+    </head>
+    <body>
+		<!-- Header -->
+         <header class="site-header">
+              <h1><a class="judul"> <b>Web Map</b> <c>Persebaran Fasilitas Kesehatan di Kabupaten Sleman</c>  </a></h1>  
+          </header>
+        <div id="map">
+        </div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/L.Control.Layers.Tree.min.js"></script>
+        <script src="js/multi-style-layer.js"></script>
+        <script src="js/leaflet-svg-shape-markers.min.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet.photon.js"></script>
+        <script src="js/leaflet-measure.js"></script>
+        <script src="data/Kecamatan_1.js"></script>
+        <script src="data/FasilitasKesehatan_2.js"></script>
+        <script>
+        var map = L.map('map', {
+            zoomControl:false, maxZoom:28, minZoom:1
+        }).fitBounds([[-7.896483793328182,110.1270817458874],[-7.498656008625188,110.69870460377122]]);
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        // remove popup's row if "visible-with-data"
+        function removeEmptyRowsFromPopupContent(content, feature) {
+         var tempDiv = document.createElement('div');
+         tempDiv.innerHTML = content;
+         var rows = tempDiv.querySelectorAll('tr');
+         for (var i = 0; i < rows.length; i++) {
+             var td = rows[i].querySelector('td.visible-with-data');
+             var key = td ? td.id : '';
+             if (td && td.classList.contains('visible-with-data') && feature.properties[key] == null) {
+                 rows[i].parentNode.removeChild(rows[i]);
+             }
+         }
+         return tempDiv.innerHTML;
+        }
+        // add class to format popup if it contains media
+		function addClassToPopupIfMedia(content, popup) {
+			var tempDiv = document.createElement('div');
+			tempDiv.innerHTML = content;
+			if (tempDiv.querySelector('td img')) {
+				popup._contentNode.classList.add('media');
+					// Delay to force the redraw
+					setTimeout(function() {
+						popup.update();
+					}, 10);
+			} else {
+				popup._contentNode.classList.remove('media');
+			}
+		}
+        var zoomControl = L.control.zoom({
+            position: 'topleft'
+        }).addTo(map);
+        var measureControl = new L.Control.Measure({
+            position: 'topleft',
+            primaryLengthUnit: 'meters',
+            secondaryLengthUnit: 'kilometers',
+            primaryAreaUnit: 'sqmeters',
+            secondaryAreaUnit: 'hectares'
+        });
+        measureControl.addTo(map);
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0].innerHTML = '';
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0].className += ' fas fa-ruler';
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+        }
+        map.createPane('pane_ESRISatellite_0');
+        map.getPane('pane_ESRISatellite_0').style.zIndex = 400;
+        var layer_ESRISatellite_0 = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            pane: 'pane_ESRISatellite_0',
+            opacity: 1.0,
+            attribution: '',
+            minZoom: 1,
+            maxZoom: 28,
+            minNativeZoom: 0,
+            maxNativeZoom: 18
+        });
+        layer_ESRISatellite_0;
+        map.addLayer(layer_ESRISatellite_0);
+        function pop_Kecamatan_1(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['WADMKC'] !== null ? autolinker.link(String(feature.properties['WADMKC']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_Kecamatan_1_0(feature) {
+            switch(String(feature.properties['WADMKC'])) {
+                case 'Berbah':
+                    return {
+                pane: 'pane_Kecamatan_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.461)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(189,204,111,0.461)',
+                interactive: true,
+            }
+                    break;
+                case 'Cangkringan':
+                    return {
+                pane: 'pane_Kecamatan_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.461)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(228,97,206,0.461)',
+                interactive: true,
+            }
+                    break;
+                case 'Depok':
+                    return {
+                pane: 'pane_Kecamatan_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.461)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(91,210,149,0.461)',
+                interactive: true,
+            }
+                    break;
+                case 'Gamping':
+                    return {
+                pane: 'pane_Kecamatan_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.461)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(54,147,67,0.461)',
+                interactive: true,
+            }
+                    break;
+                case 'Godean':
+                    return {
+                pane: 'pane_Kecamatan_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.461)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(220,27,127,0.461)',
+                interactive: true,
+            }
+                    break;
+                case 'Kalasan':
+                    return {
+                pane: 'pane_Kecamatan_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.461)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(67,101,133,0.461)',
+                interactive: true,
+            }
+                    break;
+                case 'Minggir':
+                    return {
+                pane: 'pane_Kecamatan_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.461)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(216,104,231,0.461)',
+                interactive: true,
+            }
+                    break;
+                case 'Mlati':
+                    return {
+                pane: 'pane_Kecamatan_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.461)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(251,178,89,0.461)',
+                interactive: true,
+            }
+                    break;
+                case 'Moyudan':
+                    return {
+                pane: 'pane_Kecamatan_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.461)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(133,92,15,0.461)',
+                interactive: true,
+            }
+                    break;
+                case 'Ngaglik':
+                    return {
+                pane: 'pane_Kecamatan_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.461)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(72,126,142,0.461)',
+                interactive: true,
+            }
+                    break;
+                case 'Ngemplak':
+                    return {
+                pane: 'pane_Kecamatan_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.461)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(240,144,173,0.461)',
+                interactive: true,
+            }
+                    break;
+                case 'Pakem':
+                    return {
+                pane: 'pane_Kecamatan_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.461)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(101,110,207,0.461)',
+                interactive: true,
+            }
+                    break;
+                case 'Prambanan':
+                    return {
+                pane: 'pane_Kecamatan_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.461)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(192,197,118,0.461)',
+                interactive: true,
+            }
+                    break;
+                case 'Seyegan':
+                    return {
+                pane: 'pane_Kecamatan_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.461)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(178,66,70,0.461)',
+                interactive: true,
+            }
+                    break;
+                case 'Sleman':
+                    return {
+                pane: 'pane_Kecamatan_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.461)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(104,54,230,0.461)',
+                interactive: true,
+            }
+                    break;
+                case 'Tempel':
+                    return {
+                pane: 'pane_Kecamatan_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.461)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(146,38,130,0.461)',
+                interactive: true,
+            }
+                    break;
+                case 'Turi':
+                    return {
+                pane: 'pane_Kecamatan_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,0.461)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(91,233,202,0.461)',
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_Kecamatan_1');
+        map.getPane('pane_Kecamatan_1').style.zIndex = 401;
+        map.getPane('pane_Kecamatan_1').style['mix-blend-mode'] = 'normal';
+        var layer_Kecamatan_1 = new L.geoJson(json_Kecamatan_1, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_Kecamatan_1',
+            layerName: 'layer_Kecamatan_1',
+            pane: 'pane_Kecamatan_1',
+            onEachFeature: pop_Kecamatan_1,
+            style: style_Kecamatan_1_0,
+        });
+        bounds_group.addLayer(layer_Kecamatan_1);
+        map.addLayer(layer_Kecamatan_1);
+        function pop_FasilitasKesehatan_2(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['toponim'] !== null ? autolinker.link(String(feature.properties['toponim']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_FasilitasKesehatan_2_0() {
+            return {
+                pane: 'pane_FasilitasKesehatan_2',
+                radius: 5.499999999999991,
+                opacity: 1,
+                color: 'rgba(184,8,8,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(184,8,8,1.0)',
+                interactive: true,
+            }
+        }
+        function style_FasilitasKesehatan_2_1() {
+            return {
+                pane: 'pane_FasilitasKesehatan_2',
+                radius: 5.999999999999993,
+                opacity: 1,
+                color: 'rgba(255,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(255,0,0,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_FasilitasKesehatan_2');
+        map.getPane('pane_FasilitasKesehatan_2').style.zIndex = 402;
+        map.getPane('pane_FasilitasKesehatan_2').style['mix-blend-mode'] = 'normal';
+        var layer_FasilitasKesehatan_2 = new L.geoJson.multiStyle(json_FasilitasKesehatan_2, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_FasilitasKesehatan_2',
+            layerName: 'layer_FasilitasKesehatan_2',
+            pane: 'pane_FasilitasKesehatan_2',
+            onEachFeature: pop_FasilitasKesehatan_2,
+            pointToLayers: [function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.shapeMarker(latlng, style_FasilitasKesehatan_2_0(feature));
+            },function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.shapeMarker(latlng, style_FasilitasKesehatan_2_1(feature));
+            },
+        ]});
+        bounds_group.addLayer(layer_FasilitasKesehatan_2);
+        map.addLayer(layer_FasilitasKesehatan_2);
+        setBounds();
+		// LAYER CONTROL
+		// =======================
+
+		// Base map
+		var baseMaps = {
+			"Google Satellite": layer_ESRISatellite_0
+		};
+
+		// Overlay layers (bisa ON/OFF)
+		var overlayMaps = {
+			"Batas Kecamatan": layer_Kecamatan_1,
+			"Fasilitas Kesehatan": layer_FasilitasKesehatan_2
+		};
+
+		// Tambahkan control ke peta
+		var layerControl = L.control.layers(baseMaps, overlayMaps, {
+									position: 'topleft'}).addTo(map);
+        </script>
+    </body>
+</html>
